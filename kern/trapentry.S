@@ -46,10 +46,84 @@
 /*
  * Lab 3: Your code here for generating entry points for the different traps.
  */
-
-
+TRAPHANDLER_NOEC(handler0, 0)
+TRAPHANDLER_NOEC(handler1, 1)
+TRAPHANDLER_NOEC(handler2, 2)
+TRAPHANDLER_NOEC(handler3, 3)
+TRAPHANDLER_NOEC(handler4, 4)
+TRAPHANDLER_NOEC(handler5, 5)
+TRAPHANDLER_NOEC(handler6, 6)
+TRAPHANDLER_NOEC(handler7, 7)
+TRAPHANDLER(handler8, 8)
+TRAPHANDLER_NOEC(handler9, 9)
+TRAPHANDLER(handler10, 10)
+TRAPHANDLER(handler11, 11)
+TRAPHANDLER(handler12, 12)
+TRAPHANDLER(handler13, 13)
+TRAPHANDLER(handler14, 14)
+TRAPHANDLER_NOEC(handler15, 15)
+TRAPHANDLER_NOEC(handler16, 16)
+TRAPHANDLER_NOEC(handler17, 17)
+TRAPHANDLER_NOEC(handler18, 18)
+TRAPHANDLER_NOEC(handler19, 19)
+TRAPHANDLER_NOEC(handler20, 20)
+TRAPHANDLER_NOEC(handler21, 21)
+TRAPHANDLER_NOEC(handler22, 22)
+TRAPHANDLER_NOEC(handler23, 23)
+TRAPHANDLER_NOEC(handler24, 24)
+TRAPHANDLER_NOEC(handler25, 25)
+TRAPHANDLER_NOEC(handler26, 26)
+TRAPHANDLER_NOEC(handler27, 27)
+TRAPHANDLER_NOEC(handler28, 28)
+TRAPHANDLER_NOEC(handler29, 29)
+TRAPHANDLER_NOEC(handler30, 30)
+TRAPHANDLER_NOEC(handler31, 31)
 
 /*
  * Lab 3: Your code here for _alltraps
  */
+_alltraps:
+	pushl %ds
+	pushl %es
+	pushal
+	movw $GD_KD, %ax
+	movw %ax, %ds
+	movw %ax, %ds
+	pushl %esp
+	call trap
 
+.data
+.globl handlers
+handlers:
+	.long handler0
+	.long handler1
+	.long handler2
+	.long handler3
+	.long handler4
+	.long handler5
+	.long handler6
+	.long handler7
+	.long handler8
+	.long handler9
+	.long handler10
+	.long handler11
+	.long handler12
+	.long handler13
+	.long handler14
+	.long handler15
+	.long handler16
+	.long handler17
+	.long handler18
+	.long handler19
+	.long handler20
+	.long handler21
+	.long handler22
+	.long handler23
+	.long handler24
+	.long handler25
+	.long handler26
+	.long handler27
+	.long handler28
+	.long handler29
+	.long handler30
+	.long handler31
