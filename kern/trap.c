@@ -150,9 +150,16 @@ static void
 trap_dispatch(struct Trapframe *tf)
 {
 	// Handle processor exceptions.
-	if (tf->tf_trapno == T_PGFLT)
+	switch (tf->tf_trapno)
 	{
-		page_fault_handler(tf);
+		case T_PGFLT:
+			page_fault_handler(tf);
+			break;
+		case T_BRKPT:
+			monitor(tf);
+			break;
+		default:
+			break;
 	}
 
 	// Unexpected trap: The user process or the kernel has a bug.
