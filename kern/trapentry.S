@@ -78,6 +78,23 @@ TRAPHANDLER_NOEC(handler28, 28)
 TRAPHANDLER_NOEC(handler29, 29)
 TRAPHANDLER_NOEC(handler30, 30)
 TRAPHANDLER_NOEC(handler31, 31)
+TRAPHANDLER_NOEC(handler32, 32)
+TRAPHANDLER_NOEC(handler33, 33)
+TRAPHANDLER_NOEC(handler34, 34)
+TRAPHANDLER_NOEC(handler35, 35)
+TRAPHANDLER_NOEC(handler36, 36)
+TRAPHANDLER_NOEC(handler37, 37)
+TRAPHANDLER_NOEC(handler38, 38)
+TRAPHANDLER_NOEC(handler39, 39)
+TRAPHANDLER_NOEC(handler40, 40)
+TRAPHANDLER_NOEC(handler41, 41)
+TRAPHANDLER_NOEC(handler42, 42)
+TRAPHANDLER_NOEC(handler43, 43)
+TRAPHANDLER_NOEC(handler44, 44)
+TRAPHANDLER_NOEC(handler45, 45)
+TRAPHANDLER_NOEC(handler46, 46)
+TRAPHANDLER_NOEC(handler47, 47)
+TRAPHANDLER_NOEC(handler48, 48)
 
 /*
  * Lab 3: Your code here for _alltraps
@@ -127,3 +144,20 @@ handlers:
 	.long handler29
 	.long handler30
 	.long handler31
+	.long handler32
+	.long handler33
+	.long handler34
+	.long handler35
+	.long handler36
+	.long handler37
+	.long handler38
+	.long handler39
+	.long handler40
+	.long handler41
+	.long handler42
+	.long handler43
+	.long handler44
+	.long handler45
+	.long handler46
+	.long handler47
+	.long handler48

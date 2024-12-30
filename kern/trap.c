@@ -71,7 +71,8 @@ trap_init(void)
 		SETGATE(idt[i], true, GD_KT, handlers[i], 0);
 	}
 
-	SETGATE(idt[T_BRKPT], false, GD_KT, handlers[T_BRKPT], 3);
+	SETGATE(idt[T_BRKPT], true, GD_KT, handlers[T_BRKPT], 3);
+	SETGATE(idt[T_SYSCALL], true, GD_KT, handlers[T_SYSCALL], 3);
 
 	// Per-CPU setup 
 	trap_init_percpu();
@@ -149,15 +150,32 @@ print_regs(struct PushRegs *regs)
 static void
 trap_dispatch(struct Trapframe *tf)
 {
+	int32_t result = 0;
+
 	// Handle processor exceptions.
 	switch (tf->tf_trapno)
 	{
 		case T_PGFLT:
 			page_fault_handler(tf);
-			break;
+			return;
 		case T_BRKPT:
 			monitor(tf);
-			break;
+			return;
+		case T_SYSCALL:
+			// The system call number will go in %eax,
+			// and the arguments (up to five of them) will
+			//go in %edx, %ecx, %ebx, %edi, and %esi, respectively.
+			result = syscall(
+				tf->tf_regs.reg_eax,
+				tf->tf_regs.reg_edx,
+				tf->tf_regs.reg_ecx,
+				tf->tf_regs.reg_ebx,
+				tf->tf_regs.reg_edi,
+				tf->tf_regs.reg_esi
+			);
+
+			tf->tf_regs.reg_eax = result;
+			return;
 		default:
 			break;
 	}
