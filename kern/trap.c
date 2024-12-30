@@ -70,8 +70,16 @@ void
 trap_init(void)
 {
 	extern struct Segdesc gdt[];
+	extern uint32_t handlers[];
+	int i = 0;
 
-	// LAB 3: Your code here.
+	for (i = 0; i < 32; i++)
+	{
+		SETGATE(idt[i], true, GD_KT, handlers[i], 0);
+	}
+
+	SETGATE(idt[T_BRKPT], true, GD_KT, handlers[T_BRKPT], 3);
+	SETGATE(idt[T_SYSCALL], true, GD_KT, handlers[T_SYSCALL], 3);
 
 	// Per-CPU setup 
 	trap_init_percpu();
@@ -174,8 +182,35 @@ print_regs(struct PushRegs *regs)
 static void
 trap_dispatch(struct Trapframe *tf)
 {
+	int32_t result = 0;
+
 	// Handle processor exceptions.
-	// LAB 3: Your code here.
+	switch (tf->tf_trapno)
+	{
+		case T_PGFLT:
+			page_fault_handler(tf);
+			return;
+		case T_BRKPT:
+			monitor(tf);
+			return;
+		case T_SYSCALL:
+			// The system call number will go in %eax,
+			// and the arguments (up to five of them) will
+			//go in %edx, %ecx, %ebx, %edi, and %esi, respectively.
+			result = syscall(
+				tf->tf_regs.reg_eax,
+				tf->tf_regs.reg_edx,
+				tf->tf_regs.reg_ecx,
+				tf->tf_regs.reg_ebx,
+				tf->tf_regs.reg_edi,
+				tf->tf_regs.reg_esi
+			);
+
+			tf->tf_regs.reg_eax = result;
+			return;
+		default:
+			break;
+	}
 
 	// Handle spurious interrupts
 	// The hardware sometimes raises these because of noise on the
@@ -269,8 +304,9 @@ page_fault_handler(struct Trapframe *tf)
 	fault_va = rcr2();
 
 	// Handle kernel-mode page faults.
-
-	// LAB 3: Your code here.
+	if ((tf->tf_cs & 3) == 0) {
+		panic("kernel page fault at: %x", fault_va);
+	}
 
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
