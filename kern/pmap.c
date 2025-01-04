@@ -644,12 +644,16 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	boot_map_region(kern_pgdir, base, size, pa, PTE_W | PTE_PCD | PTE_PWT);
 
 	void *ret_base = (void *)base;
 	uintptr_t va = ROUNDUP(base + size, PGSIZE);
-	base = va;
 
+	if (va > MMIOLIM)
+		panic("Error - MMIO overflow at 0x%x", va);
+
+	boot_map_region(kern_pgdir, base, size, pa, PTE_W | PTE_PCD | PTE_PWT);
+
+	base = va;
 	return ret_base;
 }
 
