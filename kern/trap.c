@@ -353,9 +353,9 @@ page_fault_handler(struct Trapframe *tf)
 			uxstack_esp = tf->tf_esp - 4;
 		}
 
-		u = (struct UTrapFrame *)(uxstack_esp - sizeof(struct UTrapFrame));
+		u = (struct UTrapframe *)(uxstack_esp - sizeof(struct UTrapframe));
 
-		user_mem_assert(curenv, u, sizeof(struct UTrapFrame), PTE_U | PTE_W);
+		user_mem_assert(curenv, u, sizeof(struct UTrapframe), PTE_U | PTE_W);
 
 		u->utf_fault_va = fault_va;
 		u->utf_err = tf->tf_err;
