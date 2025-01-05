@@ -341,7 +341,36 @@ page_fault_handler(struct Trapframe *tf)
 	//   To change what the user environment runs, modify 'curenv->env_tf'
 	//   (the 'tf' variable points at 'curenv->env_tf').
 
-	// LAB 4: Your code here.
+	if (curenv->env_pgfault_upcall)
+	{
+		uintptr_t UXSTACKBOTTOM = UXSTACKTOP - PGSIZE;
+		uintptr_t uxstack_esp = UXSTACKTOP;
+		struct UTrapframe *u = NULL;
+
+		if (tf->tf_esp >= UXSTACKBOTTOM && tf->tf_esp < UXSTACKTOP)
+		{
+			// We are already on a user page fault. Next fault will be placed 4 bytes underneath
+			uxstack_esp = tf->tf_esp - 4;
+		}
+
+		u = (struct UTrapFrame *)(uxstack_esp - sizeof(struct UTrapFrame));
+
+		user_mem_assert(curenv, u, sizeof(struct UTrapFrame), PTE_U | PTE_W);
+
+		u->utf_fault_va = fault_va;
+		u->utf_err = tf->tf_err;
+		u->utf_regs = tf->tf_regs;
+		u->utf_eip = tf->tf_eip;
+		u->utf_eflags = tf->tf_eflags;
+		u->utf_esp = tf->tf_esp;
+
+		// Set the instruction pointer to the page fault upcall
+		// and the stack pointer to the top of the user trap frame
+		curenv->env_tf.tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
+		curenv->env_tf.tf_esp = (uintptr_t)u;
+
+		env_run(curenv);
+	}
 
 	// Destroy the environment that caused the fault.
 	cprintf("[%08x] user fault va %08x ip %08x\n",
