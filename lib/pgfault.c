@@ -25,16 +25,17 @@ void
 set_pgfault_handler(void (*handler)(struct UTrapframe *utf))
 {
 	int r;
+	envid_t envid = sys_getenvid();
 
 	if (_pgfault_handler == 0) {
 		// First time through!
-		r = sys_page_alloc(0, (void *)(UXSTACKTOP - PGSIZE), PTE_U | PTE_W);
+		r = sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_U | PTE_W);
 		if (r != 0)
 		{
 			panic("Error - sys call page allocation for page fault handler failed %e", r);
 		}
 
-		sys_env_set_pgfault_upcall(0, _pgfault_upcall);
+		sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
 	}
 
 	// Save handler pointer for assembly to call.
