@@ -73,13 +73,15 @@ trap_init(void)
 	extern uint32_t handlers[];
 	int i = 0;
 
-	for (i = 0; i < 32; i++)
+	// Initializing interrupts and exceptions
+	for (i = 0; i < 48; i++)
 	{
-		SETGATE(idt[i], true, GD_KT, handlers[i], 0);
+		SETGATE(idt[i], false, GD_KT, handlers[i], 0);
 	}
 
-	SETGATE(idt[T_BRKPT], true, GD_KT, handlers[T_BRKPT], 3);
-	SETGATE(idt[T_SYSCALL], true, GD_KT, handlers[T_SYSCALL], 3);
+	// Overriding the default settings for breakpoint and syscalls
+	SETGATE(idt[T_BRKPT], false, GD_KT, handlers[T_BRKPT], 3);
+	SETGATE(idt[T_SYSCALL], false, GD_KT, handlers[T_SYSCALL], 3);
 
 	// Per-CPU setup 
 	trap_init_percpu();
