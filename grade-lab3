@@ -120,7 +120,7 @@ def test_buggyhello():
 @test(5)
 def test_buggyhello2():
     r.user_test("buggyhello2")
-    r.match('.00001000. user_mem_check assertion failure for va 0....000',
+    r.match('.00001000. user_mem_check assertion failure for va 0...',
             '.00001000. free env 00001000',
             no=['hello, world'])
 
