@@ -22,9 +22,32 @@
 int32_t
 ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 {
-	// LAB 4: Your code here.
-	panic("ipc_recv not implemented");
-	return 0;
+	void *dstva = NULL;
+	int rc = 0;
+
+	if (!pg)
+	{
+		// If it is at or above UTOP, then it is not a valid
+		// address to map a page
+		dstva = (void *)UTOP;
+	}
+	else
+	{
+		dstva = pg;
+	}
+
+	if ((rc = sys_ipc_recv(dstva)) < 0)
+	{
+		if (from_env_store != NULL) *from_env_store = 0;
+		if (perm_store != NULL) *perm_store = 0;
+
+		return (int32_t)rc;
+	}
+
+	if (from_env_store != NULL) *from_env_store = thisenv->env_ipc_from;
+	if (perm_store != NULL) *perm_store = thisenv->env_ipc_perm;
+
+	return (int32_t)thisenv->env_ipc_value;
 }
 
 // Send 'val' (and 'pg' with 'perm', if 'pg' is nonnull) to 'toenv'.
@@ -38,8 +61,27 @@ ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 void
 ipc_send(envid_t to_env, uint32_t val, void *pg, int perm)
 {
-	// LAB 4: Your code here.
-	panic("ipc_send not implemented");
+	void *srcva = NULL;
+	int rc = 0;
+
+	if (!pg)
+	{
+		// If it is at or above UTOP, then it is not a valid
+		// address to map a page
+		srcva = (void *)UTOP;
+	}
+	else
+	{
+		srcva = pg;
+	}
+
+	while ((rc = sys_ipc_try_send(to_env, val, srcva, perm)) == -E_IPC_NOT_RECV)
+	{
+		sys_yield();
+	}
+
+	if (rc != 0)
+		panic("Error - failed to send ipc to envid %d with error %e", to_env, rc);
 }
 
 // Find the first environment of the given type.  We'll use this to
