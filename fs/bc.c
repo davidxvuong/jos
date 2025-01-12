@@ -47,11 +47,20 @@ bc_pgfault(struct UTrapframe *utf)
 	// Hint: first round addr to page boundary. fs/ide.c has code to read
 	// the disk.
 	//
-	// LAB 5: you code here:
+	uintptr_t lo_addr = ROUNDDOWN((uintptr_t)addr, BLKSIZE);
+	if ((r = sys_page_alloc(thisenv->env_id, (void *)lo_addr, PTE_U | PTE_W)) < 0)
+	{
+		panic("Error - failed to allocate page in fs %e", r);
+	}
+
+	if ((r = ide_read(BLKSECTS * blockno, (void *)lo_addr, BLKSECTS)) < 0)
+	{
+		panic("Error - block read failed %e", r);
+	}
 
 	// Clear the dirty bit for the disk block page since we just read the
 	// block from disk
-	if ((r = sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL)) < 0)
+	if ((r = sys_page_map(0, (void *)lo_addr, 0, (void *)lo_addr, uvpt[PGNUM(addr)] & PTE_SYSCALL)) < 0)
 		panic("in bc_pgfault, sys_page_map: %e", r);
 
 	// Check that the block we read was allocated. (exercise for
@@ -72,12 +81,25 @@ void
 flush_block(void *addr)
 {
 	uint32_t blockno = ((uint32_t)addr - DISKMAP) / BLKSIZE;
+	int r = 0;
 
 	if (addr < (void*)DISKMAP || addr >= (void*)(DISKMAP + DISKSIZE))
 		panic("flush_block of bad va %08x", addr);
 
-	// LAB 5: Your code here.
-	panic("flush_block not implemented");
+	uintptr_t lo_addr = ROUNDDOWN((uintptr_t)addr, BLKSIZE);
+	if (va_is_mapped((void *)lo_addr) && va_is_dirty((void *)lo_addr))
+	{
+		if ((r = ide_write(BLKSECTS * blockno, (void *)lo_addr, BLKSECTS)) < 0)
+		{
+			panic ("Error - failed to flush block to disk %e", r);
+		}
+
+		if ((r = sys_page_map(0, (void *)lo_addr, 0, (void *)lo_addr, uvpt[PGNUM(addr)] & PTE_SYSCALL)) < 0)
+		{
+			panic("Error - failed to clear the dirty bit after flushing to disk %e", r);
+		}
+	}
+
 }
 
 // Test that the block cache works, by smashing the superblock and
