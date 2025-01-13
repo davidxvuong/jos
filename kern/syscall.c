@@ -335,6 +335,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 	struct Env *target_env = NULL;
 	struct PageInfo *pp = NULL;
 	pte_t *env_pte = NULL;
+	int rc = 0;
 
 	if (envid2env(envid, &target_env, 0) != 0)
 	{
@@ -346,7 +347,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 		return -E_IPC_NOT_RECV;
 	}
 
-	if ((uintptr_t)srcva < UTOP)
+	if ((uintptr_t)srcva < UTOP && target_env->env_ipc_dstva != NULL)
 	{
 		if ((uintptr_t)srcva % PGSIZE != 0 || (perm & ~PTE_SYSCALL) != 0)
 		{
@@ -359,22 +360,27 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 		{
 			return -E_INVAL;
 		}
-	}
 
-	if (perm & PTE_W && !(*env_pte & PTE_W))
-	{
-		return -E_INVAL;
-	}
+		if (perm & PTE_W && !(*env_pte & PTE_W))
+		{
+			return -E_INVAL;
+		}
 
-	if (target_env->env_ipc_dstva != NULL && page_insert(target_env->env_pgdir, pp, target_env->env_ipc_dstva, perm) < 0)
+		if (page_insert(target_env->env_pgdir, pp, target_env->env_ipc_dstva, perm) < 0)
+		{
+			return -E_NO_MEM;
+		}
+
+		target_env->env_ipc_perm = perm;
+	}
+	else
 	{
-		return -E_NO_MEM;
+		target_env->env_ipc_perm = 0;
 	}
 
 	target_env->env_ipc_recving = 0;
 	target_env->env_ipc_from = curenv->env_id;
 	target_env->env_ipc_value = value;
-	target_env->env_ipc_perm = perm;
 	target_env->env_status = ENV_RUNNABLE;
 
 	return 0;
