@@ -147,7 +147,6 @@ static int
 file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
 {
 	int blockno = 0;
-	void *dsk_addr = NULL;
 	uint32_t *blk = NULL;
 
 	if (filebno >= NDIRECT + NINDIRECT)
@@ -169,11 +168,10 @@ file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool all
 			return -E_NO_DISK;
 
 		f->f_indirect = blockno;
-		dsk_addr = diskaddr(f->f_indirect);
-		memset(dsk_addr, 0, BLKSIZE);
+		memset(diskaddr(f->f_indirect), 0, BLKSIZE);
 	}
 
-	blk = (uint32_t *)dsk_addr;
+	blk = (uint32_t *)diskaddr(f->f_indirect);
 	*ppdiskbno = &blk[filebno - NDIRECT];
 
 	return 0;
