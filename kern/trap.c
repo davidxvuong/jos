@@ -113,8 +113,6 @@ trap_init_percpu(void)
 	// get a triple fault.  If you set up an individual CPU's TSS
 	// wrong, you may not get a fault until you try to return from
 	// user space on that CPU.
-	//
-	// LAB 4: Your code here:
 
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
@@ -225,7 +223,6 @@ trap_dispatch(struct Trapframe *tf)
 
 	// Handle clock interrupts. Don't forget to acknowledge the
 	// interrupt using lapic_eoi() before calling the scheduler!
-	// LAB 4: Your code here.
 	if (tf->tf_trapno == IRQ_OFFSET + IRQ_TIMER)
 	{
 		lapic_eoi();
@@ -234,7 +231,17 @@ trap_dispatch(struct Trapframe *tf)
 	}
 
 	// Handle keyboard and serial interrupts.
-	// LAB 5: Your code here.
+	if (tf->tf_trapno == IRQ_OFFSET + IRQ_KBD)
+	{
+		kbd_intr();
+		return;
+	}
+
+	if (tf->tf_trapno == IRQ_OFFSET + IRQ_SERIAL)
+	{
+		serial_intr();
+		return;
+	}
 
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
@@ -271,7 +278,6 @@ trap(struct Trapframe *tf)
 		// Trapped from user mode.
 		// Acquire the big kernel lock before doing any
 		// serious kernel work.
-		// LAB 4: Your code here.
 		lock_kernel();
 		assert(curenv);
 

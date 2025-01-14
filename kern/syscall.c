@@ -149,6 +149,19 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 		return rc;
 
 	e->env_tf = *tf;
+
+	// set the IOPL to 0
+	e->env_tf.tf_eflags &= ~FL_IOPL_MASK;
+
+	// enable interrupts
+	e->env_tf.tf_eflags |= FL_IF;
+
+	// set user privilage level
+	e->env_tf.tf_ds = GD_UD | 3;
+	e->env_tf.tf_es = GD_UD | 3;
+	e->env_tf.tf_ss = GD_UD | 3;
+	e->env_tf.tf_cs = GD_UT | 3;
+
 	return 0;
 }
 
