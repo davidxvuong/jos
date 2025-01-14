@@ -301,7 +301,31 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 static int
 copy_shared_pages(envid_t child)
 {
-	// LAB 5: Your code here.
+	int rc = 0, i = 0, j = 0;
+	uint32_t pn = 0;
+	void *addr = NULL;
+
+	for (i = 0; i < NPDENTRIES; i++)
+	{
+		if (!(uvpd[i] & PTE_P))
+			continue;
+
+		for (j = 0; j < NPTENTRIES; j++)
+		{
+			pn = i * NPDENTRIES + j;
+
+			if (pn == PGNUM(UXSTACKTOP - PGSIZE)) continue;		// Page is the user exception stack
+			else if (pn >= PGNUM(UTOP - PGSIZE)) continue;		// Page is above UTOP
+			else if (!(uvpt[pn] & PTE_P)) continue;				// No page present
+
+			addr = (void *)(pn * PGSIZE);
+
+			if (uvpt[pn] & PTE_SHARE)
+				if ((rc = sys_page_map(0, addr, child, addr, uvpt[pn] & PTE_SYSCALL)) < 0)
+					return -1;
+		}
+	}
+
 	return 0;
 }
 

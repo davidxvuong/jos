@@ -11,8 +11,6 @@ void sched_halt(void);
 void
 sched_yield(void)
 {
-	struct Env *idle;
-
 	// Implement simple round-robin scheduling.
 	//
 	// Search through 'envs' for an ENV_RUNNABLE environment in
@@ -28,8 +26,34 @@ sched_yield(void)
 	// another CPU (env_status == ENV_RUNNING). If there are
 	// no runnable environments, simply drop through to the code
 	// below to halt the cpu.
+	int curenv_idx = 0, idx = 0, found_idx = -1, i = 0;
 
-	// LAB 4: Your code here.
+	if (curenv)
+	{
+		curenv_idx = ENVX(curenv->env_id);
+	}
+
+	for (i = 0; i < NENV; i++)
+	{
+		curenv_idx++;
+		idx = curenv_idx % NENV;
+		if (envs[idx].env_status == ENV_RUNNABLE)
+		{
+			found_idx = idx;
+			break;
+		}
+	}
+
+	if (found_idx != -1)
+	{
+		// Found runnable environment
+		env_run(&envs[found_idx]);
+	}
+	else if (curenv && curenv->env_status == ENV_RUNNING)
+	{
+		// No new runnable environment, but we can still run curenv
+		env_run(curenv);
+	}
 
 	// sched_halt never returns
 	sched_halt();
@@ -76,7 +100,7 @@ sched_halt(void)
 		"pushl $0\n"
 		"pushl $0\n"
 		// Uncomment the following line after completing exercise 13
-		//"sti\n"
+		"sti\n"
 		"1:\n"
 		"hlt\n"
 		"jmp 1b\n"
