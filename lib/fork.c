@@ -84,7 +84,7 @@ duppage(envid_t envid, unsigned pn)
 	void *addr = (void *)(pn * PGSIZE);
 	envid_t srcid = sys_getenvid();
 
-	if (pte & PTE_COW || pte & PTE_W)
+	if (((pte & PTE_COW) || (pte & PTE_W)) && !(pte & PTE_SHARE))
 	{
 		perm = ((pte & ~PTE_W) | PTE_COW) & PTE_SYSCALL;
 		r = sys_page_map(srcid, addr, envid, addr, perm);
