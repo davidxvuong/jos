@@ -1,6 +1,7 @@
 #include <kern/e1000.h>
 #include <kern/pmap.h>
 #include <inc/string.h>
+#include <inc/error.h>
 
 volatile uint32_t *e1000_base = NULL;
 
@@ -31,7 +32,7 @@ int e1000_attach(struct pci_func *pcif)
         tx_desc[i].addr = PADDR(tx_buf + (E1000_TX_DESC_COUNT * E1000_PACKET_SIZE_BYTES));
         tx_desc[i].length = E1000_PACKET_SIZE_BYTES;
         tx_desc[i].status |= E1000_TXD_STAT_DD & 1;
-        tx_desc[i].cmd |= (E1000_TXD_CMD_EOP & 1) | (E1000_TXD_CMD_RS & (1 << 3)) | (E1000_TXD_CMD_DEXT & (1 << 5));
+        tx_desc[i].cmd |= (1) | (1 << 3);       // Setting EOP + Report Status (section 3.3.3.1)
     }
 
     // Program the Transmit Descriptor Base Address (TDBAL/TDBAH) register(s) with the address of the
@@ -70,13 +71,12 @@ int e1000_tx(char *buf, int size)
 {
     int i = E1000_REG(E1000_TDT);
 
-    if (size > E1000_PACKET_SIZE_BYTES)
-        return -1;
+    assert(size <= E1000_PACKET_SIZE_BYTES);
 
     if (!(tx_desc[i].status & E1000_TXD_STAT_DD))
-        return -2;
+        return -E_NIC_BUSY;
 
-    tx_desc[i].status = ~E1000_TXD_STAT_DD;
+    tx_desc[i].status &= ~E1000_TXD_STAT_DD;
     memcpy(&tx_desc[i].addr, buf, size);
     tx_desc[i].length = size;
     i = (i + 1) % E1000_TX_DESC_COUNT;
