@@ -23,6 +23,7 @@
 // TX Descriptor bit definitions
 #define E1000_TXD_CMD_EOP                   0x01000000 /* End of Packet */
 #define E1000_TXD_CMD_RS                    0x08000000 /* Report Status */
+#define E1000_TXD_CMD_DEXT                  0x20000000 /* Descriptor extension (0 = legacy) */
 #define E1000_TXD_STAT_DD                   0x00000001 /* Descriptor Done */
 
 // TX Control
@@ -36,37 +37,20 @@
 #define E1000_PACKET_SIZE_BYTES             1518
 
 // Transmit Descriptor
-
-// Transmit Descriptor Fields
-// Each transmit descriptor is 16 bytes long and contains the following fields:
-
-// Buffer Address (64 bits):
-// A pointer to the location in memory where the packet data resides.
-// Length (16 bits):
-// Specifies the length of the data in the buffer (in bytes).
-// Checksum Offset (CSO, 8 bits):
-// Indicates where the card should begin checksum calculations within the buffer.
-// Command (8 bits):
-// Defines actions the card should take for this descriptor, such as initiating transmission or enabling interrupts.
-// Status (8 bits):
-// Provides feedback from the controller on the processing state of the descriptor.
-// Checksum Start Field (CSS, 8 bits):
-// Specifies the starting byte for checksum calculations.
-// Special (16 bits):
-// Reserved for special purposes, often application-specific.
 struct e1000_tx_desc
 {
-	uint64_t addr;
-	uint16_t length;
-	uint8_t cso;
-	uint8_t cmd;
-	uint8_t status;
-	uint8_t css;
-	uint16_t special;
+	uint64_t addr;              /* Address of the descriptor's data buffer */
+	uint16_t length;            /* Data buffer length */
+	uint8_t cso;                /* Checksum offset */
+	uint8_t cmd;                /* Descriptor control */
+	uint8_t status;             /* Descriptor status */
+	uint8_t css;                /* Checksum start */
+	uint16_t special;           /* See section 3.3.3 in manual */
 } __attribute__((packed));;
 
 
 // Function definitions
 int e1000_attach(struct pci_func *pcif);
+int e1000_tx(char *buf, int size);
 
 #endif  // SOL >= 6
