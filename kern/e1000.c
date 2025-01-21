@@ -154,3 +154,17 @@ int e1000_tx(char *buf, int size)
 
     return 0;
 }
+
+int e1000_rx(char *buf)
+{
+    int i = (E1000_REG(E1000_RDT) + 1) % E1000_RX_DESC_COUNT;
+
+    if (!(rx_desc[i].status & E1000_RXD_STAT_DD))
+        return -E_RX_EMPTY;
+
+    tx_desc[i].status &= ~E1000_RXD_STAT_DD;
+    memcpy(buf, &rx_buf[i], rx_desc[i].length);
+    E1000_REG(E1000_RDT) = i;
+
+    return rx_desc[i].length;
+}

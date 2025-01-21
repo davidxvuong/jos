@@ -460,6 +460,15 @@ sys_tx_packet(char *buf, int size)
 	return e1000_tx(buf, size);
 }
 
+static int
+sys_rx_packet(char *buf)
+{
+	if (!buf)
+		return -E_INVAL;
+
+	return e1000_rx(buf);
+}
+
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5)
@@ -501,6 +510,8 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 			return (int32_t)sys_time_msec();
 		case SYS_tx_packet:
 			return (int32_t)sys_tx_packet((char *)a1, (int)a2);
+		case SYS_rx_packet:
+			return (int32_t)sys_rx_packet((char *)a1);
 		default:
 			return -E_INVAL;
 	}

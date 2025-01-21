@@ -1,8 +1,6 @@
 #include "ns.h"
 #include <inc/lib.h>
 
-#define E1000_PACKET_SIZE_BYTES             1518
-
 extern union Nsipc nsipcbuf;
 
 void
@@ -32,8 +30,8 @@ output(envid_t ns_envid)
 
 			for (i = 0; i < pkt->jp_len; i += E1000_PACKET_SIZE_BYTES)
 			{
-				tx_size = MIN(pkt->jp_len - i, E1000_PACKET_SIZE_BYTES);
-				while((rc = sys_tx_packet(buf, tx_size)) != 0)
+				tx_size = MIN(pkt->jp_len - (i * E1000_PACKET_SIZE_BYTES), E1000_PACKET_SIZE_BYTES);
+				while((rc = sys_tx_packet(&buf[i], tx_size)) != 0)
 				{
 					if (rc == -E_NIC_BUSY)
 						sys_yield();

@@ -6,6 +6,7 @@
 #define DEFAULT "10.0.2.2"
 
 #define TIMER_INTERVAL 250
+#define E1000_PACKET_SIZE_BYTES 1518
 
 // Virtual address at which to receive page mappings containing client requests.
 #define QUEUE_SIZE	20

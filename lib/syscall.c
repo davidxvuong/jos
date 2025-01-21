@@ -128,3 +128,9 @@ sys_tx_packet(void *buf, int size)
 {
 	return syscall(SYS_tx_packet, 1, (uint32_t)buf, size, 0, 0, 0);
 }
+
+int
+sys_rx_packet(void *buf)
+{
+	return syscall(SYS_rx_packet, 0, (uint32_t)buf, 0, 0, 0, 0);
+}

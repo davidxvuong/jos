@@ -89,5 +89,6 @@ struct e1000_rx_desc
 // Function definitions
 int e1000_attach(struct pci_func *pcif);
 int e1000_tx(char *buf, int size);
+int e1000_rx(char *buf);
 
 #endif  // SOL >= 6
