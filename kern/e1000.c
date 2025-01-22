@@ -40,7 +40,7 @@ static void e1000_tx_init()
 
     // Set the Transmit Descriptor Length (TDLEN) register to the size (in bytes) of the descriptor ring.
     // This register must be 128-byte aligned.
-    E1000_REG(E1000_TDLEN) = E1000_TX_DESC_COUNT * E1000_TX_DESC_SIZE_BYTES;
+    E1000_REG(E1000_TDLEN) = sizeof(tx_desc);
 
     // The Transmit Descriptor Head and Tail (TDH/TDT) registers are initialized (by hardware) to 0b
     // after a power-on or a software initiated Ethernet controller reset. Software should write 0b to both
@@ -97,7 +97,7 @@ static void e1000_rx_init()
 
     // Set the Receive Descriptor Length (RDLEN) register to the size (in bytes) of the descriptor ring.
     // This register must be 128-byte aligned
-    E1000_REG(E1000_RDLEN) = E1000_RX_DESC_COUNT * E1000_RX_DESC_SIZE_BYTES;
+    E1000_REG(E1000_RDLEN) = sizeof(rx_desc);
 
     // Software initializes the Receive Descriptor Head (RDH) register and Receive Descriptor Tail (RDT) with the
     // appropriate head and tail addresses. Head should point to the first valid receive descriptor in the
