@@ -147,7 +147,7 @@ int e1000_tx(char *buf, int size)
         return -E_NIC_BUSY;
 
     tx_desc[i].status &= ~E1000_TXD_STAT_DD;
-    memcpy(&tx_buf[i], buf, size);
+    memcpy(&tx_buf[i * E1000_PACKET_SIZE_BYTES], buf, size);
     tx_desc[i].length = size;
     i = (i + 1) % E1000_TX_DESC_COUNT;
     E1000_REG(E1000_TDT) = i;
@@ -162,8 +162,8 @@ int e1000_rx(char *buf)
     if (!(rx_desc[i].status & E1000_RXD_STAT_DD))
         return -E_RX_EMPTY;
 
-    tx_desc[i].status &= ~E1000_RXD_STAT_DD;
-    memcpy(buf, &rx_buf[i], rx_desc[i].length);
+    rx_desc[i].status &= ~E1000_RXD_STAT_DD;
+    memcpy(buf, &rx_buf[i * E1000_PACKET_SIZE_BYTES], rx_desc[i].length);
     E1000_REG(E1000_RDT) = i;
 
     return rx_desc[i].length;
