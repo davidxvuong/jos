@@ -163,7 +163,7 @@ int e1000_rx(char *buf)
         return -E_RX_EMPTY;
 
     rx_desc[i].status &= ~E1000_RXD_STAT_DD;
-    memcpy(buf, &rx_buf[i * E1000_PACKET_SIZE_BYTES], rx_desc[i].length);
+    memcpy(buf, &rx_buf[i * E1000_RX_DESC_SIZE_BYTES], rx_desc[i].length);
     E1000_REG(E1000_RDT) = i;
 
     return rx_desc[i].length;
