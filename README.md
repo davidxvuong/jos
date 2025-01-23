@@ -1,0 +1,3 @@
+This repo has my solution for all the main exercises for all labs in the [MIT 6.828 - Operating Systems Engineering course (Fall 2018)](https://pdos.csail.mit.edu/6.828/2018/overview.html). This does not include any challenge problems (except for one - see below) as of the time of writing.
+
+Note that I am a working professional, so there are certain parts where I did not want to spend too much time figuring out on my own (e.g. some of the assembly code in lab4, one challenge problem that I took in lab2 from another user as I thought it might be helpful when debugging later labs, some issues with lab5 compilation issues).
